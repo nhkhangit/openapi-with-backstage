@@ -1,0 +1,239 @@
+---
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-system
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: examples
+spec:
+  owner: guests
+---
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-component
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: example-website
+spec:
+  type: website
+  lifecycle: experimental
+  owner: guests
+  system: examples
+  providesApis: [example-grpc-api]
+---
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-api
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: example-grpc-api1
+spec:
+  type: grpc
+  lifecycle: experimental
+  owner: guests
+  system: examples
+  definition: |
+    syntax = "proto3";
+
+    service Exampler {
+      rpc Example (ExampleMessage) returns (ExampleMessage) {};
+    }
+
+    message ExampleMessage {
+      string example = 1;
+    };
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: galaxy-pay-api
+  description: Galaxy Pay API for topup, refund, and inhouse transfer operations
+  tags:
+    - payment
+    - finance
+spec:
+  type: openapi
+  lifecycle: production
+  owner: finance-team
+  system: payment-system
+  definition: |
+    openapi: "3.0.0"
+    info:
+      version: 1.0.0
+      title: Galaxy Pay API
+      description: API for Galaxy Pay operations including top-up, refund, and inhouse transfer.
+      license:
+        name: MIT
+    servers:
+      - url: http://localhost:8084
+    paths:
+      /api/wallet/v1.0/account/topup:
+        post:
+          summary: Top up Galaxy Pay account
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    request:
+                      type: object
+                      properties:
+                        partnerId:
+                          type: string
+                        requestId:
+                          type: string
+                        requestTime:
+                          type: string
+                        signature:
+                          type: string
+                    data:
+                      type: object
+                      properties:
+                        transactionCode:
+                          type: string
+                        linkedEwalletNumber:
+                          type: string
+                        galaxyPayToken:
+                          type: string
+                        amount:
+                          type: number
+                        description:
+                          type: string
+          responses:
+            '200':
+              description: Successful response
+              content:
+                application/json:
+                  schema:
+                    type: object
+      /api/hdb/v1.0/account/topup/refund:
+        post:
+          summary: Refund a Galaxy Pay transaction
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    request:
+                      type: object
+                      properties:
+                        partnerId:
+                          type: string
+                        requestId:
+                          type: string
+                        requestTime:
+                          type: string
+                        signature:
+                          type: string
+                    data:
+                      type: object
+                      properties:
+                        transactionId:
+                          type: string
+                        linkedEwalletNumber:
+                          type: string
+                        description:
+                          type: string
+          responses:
+            '200':
+              description: Refund processed successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
+      /inhouseFTService/v1/xfer/createInhouseFT:
+        post:
+          summary: Create an Inhouse Fund Transfer
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    createInhouseFTReq:
+                      type: object
+                      properties:
+                        header:
+                          type: object
+                          properties:
+                            common:
+                              type: object
+                              properties:
+                                serviceVersion:
+                                  type: string
+                                messageId:
+                                  type: string
+                                transactionId:
+                                  type: string
+                                messageTimestamp:
+                                  type: string
+                            client:
+                              type: object
+                              properties:
+                                sourceAppID:
+                                  type: string
+                                targetAppIDs:
+                                  type: array
+                                  items:
+                                    type: string
+                                userDetail:
+                                  type: object
+                                  properties:
+                                    userID:
+                                      type: string
+                                    userPassword:
+                                      type: string
+                        bodyReq:
+                          type: object
+                          properties:
+                            functionCode:
+                              type: string
+                            processCode:
+                              type: string
+                            serviceCode:
+                              type: string
+                            xferInfo:
+                              type: object
+                              properties:
+                                referenceNumber:
+                                  type: string
+                                traceNumber:
+                                  type: string
+                                debitAccount:
+                                  type: object
+                                  properties:
+                                    acctNo:
+                                      type: string
+                                creditAccount:
+                                  type: object
+                                  properties:
+                                    acctNo:
+                                      type: string
+                                amount:
+                                  type: object
+                                  properties:
+                                    amount:
+                                      type: string
+                                    currency:
+                                      type: string
+                            remark:
+                              type: string
+                            cardAccepter:
+                              type: string
+                            transDate:
+                              type: string
+                            merchantType:
+                              type: string
+                            requestTime:
+                              type: string
+                            acquirerInstitutionIdCode:
+                              type: string
+          responses:
+            '200':
+              description: Inhouse transfer created successfully
+              content:
+                application/json:
+                  schema:
+                    type: object
